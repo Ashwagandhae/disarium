@@ -1,9 +1,9 @@
 use disarium::find_disarium;
 
-const BOUND: u64 = 10u64.pow(8);
+const BOUND: u64 = 10_000_000_000;
 
 fn main() {
-    for num in find_disarium(BOUND) {
+    for num in find_disarium(BOUND.try_into().unwrap()) {
         println!("{num}");
     }
 }

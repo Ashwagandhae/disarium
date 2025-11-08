@@ -60,6 +60,26 @@ impl Digits {
         self.overwrite_digits(digits);
         self
     }
+
+    fn min_for_digit_count(digit_count: u32) -> Self {
+        let mut digits = [0; NUM_DIGITS];
+        digits[digits.len() - digit_count as usize] = 1;
+        Self {
+            first_non_zero_index: digits.len() - digit_count as usize,
+            digits,
+        }
+    }
+
+    fn max_for_digit_count(digit_count: u32) -> Self {
+        let mut digits = [0; NUM_DIGITS];
+        for i in (0..NUM_DIGITS).rev().take(digit_count as usize) {
+            digits[i] = 9;
+        }
+        Self {
+            first_non_zero_index: digits.len() - digit_count as usize,
+            digits,
+        }
+    }
 }
 
 fn calc_exp(digits: &[Digit]) -> Number {
@@ -116,6 +136,8 @@ const DIGIT_POWERS: [[Number; NUM_DIGITS]; 10] = {
     }
     table
 };
+
+#[inline]
 fn exp_digit(digit: Digit, position: usize) -> Number {
     DIGIT_POWERS[digit as usize][position]
 }
@@ -135,11 +157,9 @@ fn disarium_for_digit_count_with_frozen(
     //     frozen_digits
     // );
 
-    let min_digits =
-        Digits::from_number((10 as Number).pow(digit_count - 1)).with_overwritten(&frozen_digits);
+    let min_digits = Digits::min_for_digit_count(digit_count).with_overwritten(&frozen_digits);
 
-    let max_digits =
-        Digits::from_number((10 as Number).pow(digit_count) - 1).with_overwritten(&frozen_digits);
+    let max_digits = Digits::max_for_digit_count(digit_count).with_overwritten(&frozen_digits);
 
     let start_digits = Digits::from_number(min_digits.exp()).with_overwritten(&frozen_digits);
     let end_digits = Digits::from_number(max_digits.exp()).with_overwritten(&frozen_digits);

@@ -120,7 +120,7 @@ fn exp_digit(digit: Digit, position: usize) -> Number {
     DIGIT_POWERS[digit as usize][position]
 }
 
-const NUM_FROZEN: usize = 5;
+const NUM_FROZEN: usize = 3;
 
 fn disarium_for_digit_count_with_frozen(
     digit_count_unfrozen: u32,

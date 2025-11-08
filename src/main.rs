@@ -1,6 +1,6 @@
 use disarium::find_disarium;
 
-const BOUND: u64 = 100_000_000;
+const BOUND: u128 = 10u128.pow(10);
 
 fn main() {
     for num in find_disarium(BOUND.try_into().unwrap()) {

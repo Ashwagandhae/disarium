@@ -7,24 +7,17 @@ type Number = u128;
 struct Digits {
     digits: [Digit; NUM_DIGITS],
     first_non_zero_index: usize,
-    exp: Number,
 }
 
 impl Digits {
     fn exp(&self) -> Number {
-        self.exp
+        calc_exp(&self.digits[self.first_non_zero_index..])
     }
 
     fn update_digit(&mut self, i: usize, new_digit: Digit) {
-        if i < self.first_non_zero_index {
-            self.digits[i] = new_digit;
+        self.digits[i] = new_digit;
+        if i < self.first_non_zero_index && new_digit != 0 {
             self.first_non_zero_index = i;
-            self.exp = calc_exp(&self.digits[self.first_non_zero_index..]);
-        } else {
-            let position = i - self.first_non_zero_index;
-            self.exp -= exp_digit(self.digits[i], position);
-            self.digits[i] = new_digit;
-            self.exp += exp_digit(self.digits[i], position);
         }
     }
 
@@ -48,12 +41,9 @@ impl Digits {
         }
         let first_non_zero_index = digits.iter().position(|&d| d != 0).unwrap_or(NUM_DIGITS);
 
-        let exp = calc_exp(&digits[first_non_zero_index..]);
-
         Self {
             digits,
             first_non_zero_index,
-            exp,
         }
     }
     fn to_number(&self) -> Number {
@@ -130,7 +120,7 @@ fn exp_digit(digit: Digit, position: usize) -> Number {
     DIGIT_POWERS[digit as usize][position]
 }
 
-const NUM_FROZEN: usize = 3;
+const NUM_FROZEN: usize = 5;
 
 fn disarium_for_digit_count_with_frozen(
     digit_count_unfrozen: u32,

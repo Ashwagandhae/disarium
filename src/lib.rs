@@ -47,7 +47,7 @@ impl<const NUM_DIGITS: usize> Digits<NUM_DIGITS> {
         }
     }
     fn to_number(&self) -> Number {
-        digits_to_num(&self.digits[self.first_non_zero_index..])
+        digits_to_num(&self.digits)
     }
 
     fn overwrite_digits(&mut self, digits: &[Digit]) {
@@ -107,7 +107,7 @@ fn num_digits(mut n: Number) -> u32 {
     }
     count
 }
-fn digits_to_num(digits: &[Digit]) -> Number {
+fn digits_to_num<const N: usize>(digits: &[Digit; N]) -> Number {
     let mut res: Number = 0;
     let mut base = 1;
     for d in digits[..].iter().rev() {

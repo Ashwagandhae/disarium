@@ -1,5 +1,5 @@
 use crate::{Digit, Number, itoa::int_to_digits};
-const MAX_DIGITS: usize = 21;
+const MAX_DIGITS: usize = 20;
 
 #[derive(Debug, Clone)]
 pub struct Digits<const NUM_DIGITS: usize> {
@@ -139,8 +139,10 @@ fn digits_to_num<const N: usize>(digits: &[Digit; N]) -> Number {
     let mut res: Number = 0;
     let mut base = 1;
     for d in digits[..].iter().rev() {
-        res += (*d as Number) * base;
-        base *= 10;
+        let res_add = (*d as Number).saturating_mul(base);
+
+        res = res.saturating_add(res_add);
+        base = base.saturating_mul(10);
     }
     res
 }

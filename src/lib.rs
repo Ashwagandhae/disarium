@@ -6,7 +6,7 @@ pub mod digits;
 pub mod itoa;
 
 pub type Digit = u8;
-pub type Number = u128;
+pub type Number = u64;
 
 fn num_digits(mut n: Number) -> u32 {
     if n == 0 {
@@ -47,30 +47,26 @@ fn disarium_for_digit_count_with_frozen<const NUM_FROZEN: usize, const NUM_DIGIT
 
     let min_digits: Digits<NUM_DIGITS> =
         Digits::min_for_digit_count(digit_count).with_overwritten(&frozen_digits);
+    let min_number = (10 as Number).pow(digit_count - 1);
 
     let max_digits: Digits<NUM_DIGITS> =
         Digits::max_for_digit_count(digit_count).with_overwritten(&frozen_digits);
+    let max_number = (10 as Number).pow(digit_count) - 1;
 
     let start_digits: Digits<NUM_DIGITS> =
         Digits::from_number_with_overwrite(min_digits.exp(), &frozen_digits);
-    // Digits::from_number(min_digits.exp()).with_overwritten(&frozen_digits);
     let end_digits: Digits<NUM_DIGITS> =
         Digits::from_number_with_overwrite(max_digits.exp(), &frozen_digits);
-    // Digits::from_number(max_digits.exp()).with_overwritten(&frozen_digits);
 
     let (start_number, start_digits) = {
         let start_number = start_digits.to_number();
-        let min_number = min_digits.to_number();
         if start_number >= min_number {
             (start_number, start_digits)
         } else {
             (min_number, min_digits)
         }
     };
-    let end = end_digits
-        .to_number()
-        .min(max_digits.to_number())
-        .min(bound);
+    let end = end_digits.to_number().min(max_number).min(bound);
 
     search_range::<NUM_FROZEN, NUM_DIGITS>(start_number, start_digits, end, NUM_FROZEN as u32)
 }

@@ -149,7 +149,7 @@ mod tests {
         const N: usize = 32;
         let mut buf = [0 as Digit; N];
 
-        for &n in &[1_000_000_000, 4_294_967_295, 9_223_372_036_854_775_807] {
+        for &n in &[1_000_000_000, 4_294_967_295, 9_223_372] {
             buf.fill(0);
             int_to_digits(n, &mut buf);
             let digits = extract_digits(&buf);

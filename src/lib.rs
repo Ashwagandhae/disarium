@@ -108,7 +108,11 @@ fn disarium_for_digit_count<const NUM_FROZEN: usize, const NUM_DIGITS: usize>(
     search_range::<NUM_FROZEN, NUM_DIGITS>(start_number, start_digits, end, 0)
 }
 
-fn freeze_and_split<const NUM_FROZEN: usize, const NUM_DIGITS: usize, const MULTI_THREAD: bool>(
+fn freeze_and_split<
+    const NUM_FROZEN: usize,
+    const NUM_DIGITS: usize,
+    const NUM_THREAD_DIGITS: u32,
+>(
     digit_count: u32,
     bound: Number,
 ) -> Vec<Number> {
@@ -116,15 +120,14 @@ fn freeze_and_split<const NUM_FROZEN: usize, const NUM_DIGITS: usize, const MULT
         disarium_for_digit_count::<NUM_FROZEN, NUM_DIGITS>(digit_count, bound)
     } else {
         let digit_count_unfrozen = digit_count - NUM_FROZEN as u32;
-        if MULTI_THREAD {
-            const NUM_THREADS_DIGITS: u32 = 2;
-            let mut res: Vec<_> = (0..(10 as Number).pow(NUM_THREADS_DIGITS))
+        if NUM_THREAD_DIGITS > 0 {
+            let mut res: Vec<_> = (0..(10 as Number).pow(NUM_THREAD_DIGITS))
                 .into_par_iter()
                 .flat_map(|i| {
-                    (0..(10 as Number).pow(NUM_FROZEN as u32 - NUM_THREADS_DIGITS))
+                    (0..(10 as Number).pow(NUM_FROZEN as u32 - NUM_THREAD_DIGITS))
                         .flat_map(|frozen_number_lower| {
                             let frozen_number = frozen_number_lower
-                                + i * (10 as Number).pow(NUM_FROZEN as u32 - NUM_THREADS_DIGITS);
+                                + i * (10 as Number).pow(NUM_FROZEN as u32 - NUM_THREAD_DIGITS);
                             let frozen_digits = num_to_digits::<NUM_FROZEN>(frozen_number);
                             disarium_for_digit_count_with_frozen::<NUM_FROZEN, NUM_DIGITS>(
                                 digit_count_unfrozen,
@@ -153,32 +156,32 @@ fn freeze_and_split<const NUM_FROZEN: usize, const NUM_DIGITS: usize, const MULT
 }
 
 const FREEZE_AND_SPLIT_FUNCS: [fn(u32, Number) -> Vec<Number>; 26] = [
-    freeze_and_split::<4, 4, false>,  // 0
-    freeze_and_split::<4, 4, false>,  // 1
-    freeze_and_split::<4, 4, false>,  // 2
-    freeze_and_split::<4, 4, false>,  // 3
-    freeze_and_split::<4, 4, false>,  // 4
-    freeze_and_split::<2, 5, false>,  // 5
-    freeze_and_split::<2, 6, false>,  // 6
-    freeze_and_split::<2, 7, true>,   // 7
-    freeze_and_split::<3, 8, true>,   // 8
-    freeze_and_split::<3, 9, true>,   // 9
-    freeze_and_split::<4, 10, true>,  // 10
-    freeze_and_split::<4, 11, true>,  // 11
-    freeze_and_split::<5, 12, true>,  // 12
-    freeze_and_split::<5, 13, true>,  // 13
-    freeze_and_split::<6, 14, true>,  // 14
-    freeze_and_split::<6, 15, true>,  // 15
-    freeze_and_split::<7, 16, true>,  // 16
-    freeze_and_split::<7, 17, true>,  // 17
-    freeze_and_split::<8, 18, true>,  // 18
-    freeze_and_split::<8, 19, true>,  // 19
-    freeze_and_split::<9, 20, true>,  // 20
-    freeze_and_split::<9, 21, true>,  // 21
-    freeze_and_split::<10, 22, true>, // 22
-    freeze_and_split::<10, 23, true>, // 23
-    freeze_and_split::<11, 24, true>, // 24
-    freeze_and_split::<11, 25, true>, // 25
+    freeze_and_split::<4, 4, 0>,   // 0
+    freeze_and_split::<4, 4, 0>,   // 1
+    freeze_and_split::<4, 4, 0>,   // 2
+    freeze_and_split::<4, 4, 0>,   // 3
+    freeze_and_split::<4, 4, 0>,   // 4
+    freeze_and_split::<2, 5, 0>,   // 5
+    freeze_and_split::<2, 6, 0>,   // 6
+    freeze_and_split::<2, 7, 1>,   // 7
+    freeze_and_split::<3, 8, 1>,   // 8
+    freeze_and_split::<3, 9, 1>,   // 9
+    freeze_and_split::<4, 10, 2>,  // 10
+    freeze_and_split::<4, 11, 2>,  // 11
+    freeze_and_split::<5, 12, 2>,  // 12
+    freeze_and_split::<5, 13, 2>,  // 13
+    freeze_and_split::<6, 14, 2>,  // 14
+    freeze_and_split::<6, 15, 2>,  // 15
+    freeze_and_split::<7, 16, 2>,  // 16
+    freeze_and_split::<7, 17, 2>,  // 17
+    freeze_and_split::<8, 18, 2>,  // 18
+    freeze_and_split::<8, 19, 2>,  // 19
+    freeze_and_split::<9, 20, 3>,  // 20
+    freeze_and_split::<9, 21, 3>,  // 21
+    freeze_and_split::<10, 22, 3>, // 22
+    freeze_and_split::<10, 23, 3>, // 23
+    freeze_and_split::<11, 24, 3>, // 24
+    freeze_and_split::<11, 25, 3>, // 25
 ];
 
 pub fn find_disarium(bound: Number) -> Vec<Number> {

@@ -53,8 +53,10 @@ fn disarium_for_digit_count_with_frozen<const NUM_FROZEN: usize, const NUM_DIGIT
 
     let start_digits: Digits<NUM_DIGITS> =
         Digits::from_number_with_overwrite(min_digits.exp(), &frozen_digits);
+    // Digits::from_number(min_digits.exp()).with_overwritten(&frozen_digits);
     let end_digits: Digits<NUM_DIGITS> =
         Digits::from_number_with_overwrite(max_digits.exp(), &frozen_digits);
+    // Digits::from_number(max_digits.exp()).with_overwritten(&frozen_digits);
 
     let (start_number, start_digits) = {
         let start_number = start_digits.to_number();

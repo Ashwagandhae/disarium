@@ -2,7 +2,8 @@ use std::time::Instant;
 
 use disarium::find_disarium;
 
-const BOUND: u128 = 10u128.pow(20);
+const BOUND: u128 = u64::MAX as u128;
+// const BOUND: u64 = 12157692622039623539;
 
 fn main() {
     let start = Instant::now();
@@ -12,7 +13,8 @@ fn main() {
     let duration = start.elapsed();
 
     println!(
-        "found numbers in {} ms, or {} secs",
+        "found numbers in {} ns, or {} ms, or {} secs",
+        duration.as_nanos(),
         duration.as_millis(),
         duration.as_secs()
     );

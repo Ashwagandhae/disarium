@@ -1,5 +1,5 @@
 use crate::{Digit, Number, itoa::int_to_digits};
-const MAX_DIGITS: usize = 22;
+const MAX_DIGITS: usize = 21;
 
 #[derive(Debug, Clone)]
 pub struct Digits<const NUM_DIGITS: usize> {
@@ -50,14 +50,14 @@ impl<const NUM_DIGITS: usize> Digits<NUM_DIGITS> {
             &mut digits[..overwrite_start],
         );
 
-        let first_non_zero_index = if index == digits[..overwrite_start].len() {
+        let first_non_zero_index = if index == overwrite_start {
             overwrite_start
                 + digits[overwrite_start..]
                     .iter()
                     .position(|&d| d != 0)
-                    .unwrap_or(digits[overwrite_start..].len())
+                    .unwrap_or(overwrite_digits.len())
         } else {
-            overwrite_start + index
+            index
         };
 
         Self {
@@ -122,7 +122,7 @@ const DIGIT_POWERS: [[Number; MAX_DIGITS]; 10] = {
     while d < 10 {
         let mut p = 0;
         while p < MAX_DIGITS {
-            table[d][p] = (d as Number).pow((p + 1) as u32);
+            table[d][p] = (d as Number).saturating_pow((p + 1) as u32);
             p += 1;
         }
         d += 1;

@@ -84,9 +84,12 @@ fn search_range<const NUM_FROZEN: usize, const NUM_DIGITS: usize>(
 
     let delta = (10 as Number).pow(delta_pow);
 
-    while number <= end {
+    loop {
         if digits.exp() == number {
             res.push(number);
+        }
+        if number >= end {
+            break;
         }
         digits.add_base_pow(delta_pow as usize);
         number += delta;
@@ -114,13 +117,14 @@ fn freeze_and_split<const NUM_FROZEN: usize, const NUM_DIGITS: usize, const MULT
     } else {
         let digit_count_unfrozen = digit_count - NUM_FROZEN as u32;
         if MULTI_THREAD {
-            let mut res: Vec<_> = (0..(10 as Number))
+            const NUM_THREADS_DIGITS: u32 = 2;
+            let mut res: Vec<_> = (0..(10 as Number).pow(NUM_THREADS_DIGITS))
                 .into_par_iter()
                 .flat_map(|i| {
-                    (0..(10 as Number).pow(NUM_FROZEN as u32 - 1))
+                    (0..(10 as Number).pow(NUM_FROZEN as u32 - NUM_THREADS_DIGITS))
                         .flat_map(|frozen_number_lower| {
-                            let frozen_number =
-                                frozen_number_lower + i * (10 as Number).pow(NUM_FROZEN as u32 - 1);
+                            let frozen_number = frozen_number_lower
+                                + i * (10 as Number).pow(NUM_FROZEN as u32 - NUM_THREADS_DIGITS);
                             let frozen_digits = num_to_digits::<NUM_FROZEN>(frozen_number);
                             disarium_for_digit_count_with_frozen::<NUM_FROZEN, NUM_DIGITS>(
                                 digit_count_unfrozen,

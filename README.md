@@ -1,6 +1,6 @@
 # disarium number finder
 
-Rust program to find all 20 disarium numbers in under 30 seconds.
+Rust program to find all 20 disarium numbers quickly.
 
 ```
 0

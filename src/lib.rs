@@ -39,7 +39,7 @@ impl Digits {
             digits[i] = (n % 10) as Digit;
             n /= 10;
         }
-        let first_non_zero_index = digits.iter().position(|&d| d != 0).unwrap_or(NUM_DIGITS);
+        let first_non_zero_index = i;
 
         Self {
             digits,
@@ -142,9 +142,7 @@ fn exp_digit(digit: Digit, position: usize) -> Number {
     DIGIT_POWERS[digit as usize][position]
 }
 
-const NUM_FROZEN: usize = 3;
-
-fn disarium_for_digit_count_with_frozen(
+fn disarium_for_digit_count_with_frozen<const NUM_FROZEN: usize>(
     digit_count_unfrozen: u32,
     bound: Number,
     frozen_digits: [Digit; NUM_FROZEN],
@@ -170,10 +168,14 @@ fn disarium_for_digit_count_with_frozen(
         .min(max_digits.to_number())
         .min(bound);
 
-    search_range(start, end, NUM_FROZEN as u32)
+    search_range::<NUM_FROZEN>(start, end, NUM_FROZEN as u32)
 }
 
-fn search_range(start: Number, end: Number, delta_pow: u32) -> Vec<Number> {
+fn search_range<const NUM_FROZEN: usize>(
+    start: Number,
+    end: Number,
+    delta_pow: u32,
+) -> Vec<Number> {
     let mut number: Number = start;
     let mut digits = Digits::from_number(number);
     let mut res = Vec::new();
@@ -190,16 +192,19 @@ fn search_range(start: Number, end: Number, delta_pow: u32) -> Vec<Number> {
     return res;
 }
 
-fn disarium_for_digit_count(digit_count: u32, bound: Number) -> Vec<Number> {
+fn disarium_for_digit_count<const NUM_FROZEN: usize>(
+    digit_count: u32,
+    bound: Number,
+) -> Vec<Number> {
     let start = (10 as Number).pow(digit_count - 1);
     let end = ((10 as Number).pow(digit_count) - 1).min(bound);
 
-    search_range(start, end, 0)
+    search_range::<NUM_FROZEN>(start, end, 0)
 }
 
-fn freeze_and_split(digit_count: u32, bound: Number) -> Vec<Number> {
+fn freeze_and_split<const NUM_FROZEN: usize>(digit_count: u32, bound: Number) -> Vec<Number> {
     if digit_count <= NUM_FROZEN as u32 {
-        disarium_for_digit_count(digit_count, bound)
+        disarium_for_digit_count::<NUM_FROZEN>(digit_count, bound)
     } else {
         let digit_count_unfrozen = digit_count - NUM_FROZEN as u32;
         // (0..(10 as Number).pow(NUM_FROZEN as u32))
@@ -215,7 +220,7 @@ fn freeze_and_split(digit_count: u32, bound: Number) -> Vec<Number> {
                     .flat_map(|frozen_number_lower| {
                         let frozen_number =
                             frozen_number_lower + i * (10 as Number).pow(NUM_FROZEN as u32 - 1);
-                        let frozen_digits = num_to_digits(frozen_number);
+                        let frozen_digits = num_to_digits::<NUM_FROZEN>(frozen_number);
                         disarium_for_digit_count_with_frozen(
                             digit_count_unfrozen,
                             bound,
@@ -229,12 +234,67 @@ fn freeze_and_split(digit_count: u32, bound: Number) -> Vec<Number> {
         res
     }
 }
+pub const FREEZE_AND_SPLIT_VARIANTS: [fn(u32, Number) -> Vec<Number>; 18] = [
+    freeze_and_split::<2>,
+    freeze_and_split::<3>,
+    freeze_and_split::<4>,
+    freeze_and_split::<5>,
+    freeze_and_split::<6>,
+    freeze_and_split::<7>,
+    freeze_and_split::<8>,
+    freeze_and_split::<9>,
+    freeze_and_split::<10>,
+    freeze_and_split::<11>,
+    freeze_and_split::<12>,
+    freeze_and_split::<13>,
+    freeze_and_split::<14>,
+    freeze_and_split::<15>,
+    freeze_and_split::<16>,
+    freeze_and_split::<17>,
+    freeze_and_split::<18>,
+    freeze_and_split::<19>,
+];
+const FREEZE_AND_SPLIT_FUNCS: [fn(u32, Number) -> Vec<Number>; 26] = [
+    freeze_and_split::<4>,  // 0
+    freeze_and_split::<4>,  // 1
+    freeze_and_split::<4>,  // 2
+    freeze_and_split::<4>,  // 3
+    freeze_and_split::<4>,  // 4
+    freeze_and_split::<2>,  // 5
+    freeze_and_split::<2>,  // 6
+    freeze_and_split::<2>,  // 7
+    freeze_and_split::<3>,  // 8
+    freeze_and_split::<3>,  // 9
+    freeze_and_split::<4>,  // 10
+    freeze_and_split::<4>,  // 11
+    freeze_and_split::<5>,  // 12
+    freeze_and_split::<5>,  // 13
+    freeze_and_split::<6>,  // 14
+    freeze_and_split::<6>,  // 15
+    freeze_and_split::<7>,  // 16
+    freeze_and_split::<7>,  // 17
+    freeze_and_split::<8>,  // 18
+    freeze_and_split::<8>,  // 19
+    freeze_and_split::<9>,  // 20
+    freeze_and_split::<9>,  // 21
+    freeze_and_split::<10>, // 22
+    freeze_and_split::<10>, // 23
+    freeze_and_split::<11>, // 24
+    freeze_and_split::<11>, // 25
+];
 
 pub fn find_disarium(bound: Number) -> Vec<Number> {
     let max_digit_count = num_digits(bound);
     std::iter::once(0)
-        .chain((1..=max_digit_count).flat_map(|digit_count| freeze_and_split(digit_count, bound)))
+        .chain((1..=max_digit_count).flat_map(|digit_count| {
+            FREEZE_AND_SPLIT_FUNCS[digit_count as usize](digit_count, bound)
+        }))
         .collect()
+}
+
+pub fn find_disarium_for_digit_count(digit_count: u32) -> Vec<Number> {
+    let max = (10 as Number).pow(digit_count) - 1;
+    FREEZE_AND_SPLIT_FUNCS[digit_count as usize](digit_count, max)
 }
 
 #[cfg(test)]

@@ -1,100 +1,12 @@
 use rayon::prelude::*;
 
-const NUM_DIGITS: usize = 22;
-type Digit = u8;
-type Number = u128;
-#[derive(Debug, Clone)]
-struct Digits<const NUM_DIGITS: usize> {
-    digits: [Digit; NUM_DIGITS],
-    first_non_zero_index: usize,
-}
+use crate::digits::Digits;
 
-impl<const NUM_DIGITS: usize> Digits<NUM_DIGITS> {
-    fn exp(&self) -> Number {
-        calc_exp(&self.digits[self.first_non_zero_index..])
-    }
+pub mod digits;
+pub mod itoa;
 
-    fn update_digit(&mut self, i: usize, new_digit: Digit) {
-        self.digits[i] = new_digit;
-        if i < self.first_non_zero_index && new_digit != 0 {
-            self.first_non_zero_index = i;
-        }
-    }
-
-    fn add_base_pow(&mut self, pow: usize) {
-        for i in (0..self.digits.len()).rev().skip(pow) {
-            if self.digits[i] < 9 {
-                self.update_digit(i, self.digits[i] + 1);
-                return;
-            }
-            self.update_digit(i, 0);
-        }
-    }
-    fn from_number(number: Number) -> Self {
-        let mut digits = [0; NUM_DIGITS];
-        let mut n = number;
-        let mut i = NUM_DIGITS;
-        while n > 0 && i > 0 {
-            i -= 1;
-            digits[i] = (n % 10) as Digit;
-            n /= 10;
-        }
-        let first_non_zero_index = i;
-
-        Self {
-            digits,
-            first_non_zero_index,
-        }
-    }
-    fn to_number(&self) -> Number {
-        digits_to_num(&self.digits)
-    }
-
-    fn overwrite_digits(&mut self, digits: &[Digit]) {
-        let start = self.digits.len() - digits.len();
-        self.digits[start..].copy_from_slice(digits);
-        if start < self.first_non_zero_index {
-            self.first_non_zero_index = start
-                + self.digits[start..]
-                    .iter()
-                    .position(|&d| d != 0)
-                    .unwrap_or(self.digits[start..].len());
-        }
-    }
-
-    fn with_overwritten(mut self, digits: &[Digit]) -> Self {
-        self.overwrite_digits(digits);
-        self
-    }
-
-    fn min_for_digit_count(digit_count: u32) -> Self {
-        let mut digits = [0; NUM_DIGITS];
-        digits[digits.len() - digit_count as usize] = 1;
-        Self {
-            first_non_zero_index: digits.len() - digit_count as usize,
-            digits,
-        }
-    }
-
-    fn max_for_digit_count(digit_count: u32) -> Self {
-        let mut digits = [0; NUM_DIGITS];
-        for i in (0..NUM_DIGITS).rev().take(digit_count as usize) {
-            digits[i] = 9;
-        }
-        Self {
-            first_non_zero_index: digits.len() - digit_count as usize,
-            digits,
-        }
-    }
-}
-
-fn calc_exp(digits: &[Digit]) -> Number {
-    digits
-        .iter()
-        .enumerate()
-        .map(|(position, digit)| exp_digit(*digit, position))
-        .sum()
-}
+pub type Digit = u8;
+pub type Number = u128;
 
 fn num_digits(mut n: Number) -> u32 {
     if n == 0 {
@@ -107,15 +19,6 @@ fn num_digits(mut n: Number) -> u32 {
     }
     count
 }
-fn digits_to_num<const N: usize>(digits: &[Digit; N]) -> Number {
-    let mut res: Number = 0;
-    let mut base = 1;
-    for d in digits[..].iter().rev() {
-        res += (*d as Number) * base;
-        base *= 10;
-    }
-    res
-}
 
 fn num_to_digits<const N: usize>(mut n: Number) -> [Digit; N] {
     let mut digits = [0; N];
@@ -127,25 +30,6 @@ fn num_to_digits<const N: usize>(mut n: Number) -> [Digit; N] {
         panic!("Number too large to fit in {} digits", N);
     }
     digits
-}
-
-const DIGIT_POWERS: [[Number; NUM_DIGITS]; 10] = {
-    let mut table = [[0; NUM_DIGITS]; 10];
-    let mut d = 0;
-    while d < 10 {
-        let mut p = 0;
-        while p < NUM_DIGITS {
-            table[d][p] = (d as Number).pow((p + 1) as u32);
-            p += 1;
-        }
-        d += 1;
-    }
-    table
-};
-
-#[inline]
-fn exp_digit(digit: Digit, position: usize) -> Number {
-    DIGIT_POWERS[digit as usize][position]
 }
 
 fn disarium_for_digit_count_with_frozen<const NUM_FROZEN: usize, const NUM_DIGITS: usize>(

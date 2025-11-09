@@ -172,22 +172,32 @@ fn disarium_for_digit_count_with_frozen<const NUM_FROZEN: usize, const NUM_DIGIT
     let end_digits: Digits<NUM_DIGITS> =
         Digits::from_number(max_digits.exp()).with_overwritten(&frozen_digits);
 
-    let start = start_digits.to_number().max(min_digits.to_number());
+    let (start_number, start_digits) = {
+        let start_number = start_digits.to_number();
+        let min_number = min_digits.to_number();
+        if start_number >= min_number {
+            (start_number, start_digits)
+        } else {
+            (min_number, min_digits)
+        }
+    };
     let end = end_digits
         .to_number()
         .min(max_digits.to_number())
         .min(bound);
 
-    search_range::<NUM_FROZEN, NUM_DIGITS>(start, end, NUM_FROZEN as u32)
+    search_range::<NUM_FROZEN, NUM_DIGITS>(start_number, start_digits, end, NUM_FROZEN as u32)
 }
 
 fn search_range<const NUM_FROZEN: usize, const NUM_DIGITS: usize>(
-    start: Number,
+    start_number: Number,
+    start_digits: Digits<NUM_DIGITS>,
     end: Number,
     delta_pow: u32,
 ) -> Vec<Number> {
-    let mut number: Number = start;
-    let mut digits: Digits<NUM_DIGITS> = Digits::from_number(number);
+    let mut number: Number = start_number;
+    let mut digits = start_digits;
+
     let mut res = Vec::new();
 
     let delta = (10 as Number).pow(delta_pow);
@@ -206,10 +216,11 @@ fn disarium_for_digit_count<const NUM_FROZEN: usize, const NUM_DIGITS: usize>(
     digit_count: u32,
     bound: Number,
 ) -> Vec<Number> {
-    let start = (10 as Number).pow(digit_count - 1);
+    let start_number = (10 as Number).pow(digit_count - 1);
+    let start_digits = Digits::min_for_digit_count(digit_count);
     let end = ((10 as Number).pow(digit_count) - 1).min(bound);
 
-    search_range::<NUM_FROZEN, NUM_DIGITS>(start, end, 0)
+    search_range::<NUM_FROZEN, NUM_DIGITS>(start_number, start_digits, end, 0)
 }
 
 fn freeze_and_split<const NUM_FROZEN: usize, const NUM_DIGITS: usize, const MULTI_THREAD: bool>(

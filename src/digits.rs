@@ -1,7 +1,4 @@
-use crate::{
-    Digit, Number,
-    itoa::{int_to_digits, int_to_digits_old},
-};
+use crate::{Digit, Number, itoa::int_to_digits};
 const MAX_DIGITS: usize = 22;
 
 #[derive(Debug, Clone)]
@@ -40,11 +37,40 @@ impl<const NUM_DIGITS: usize> Digits<NUM_DIGITS> {
             first_non_zero_index,
         }
     }
+
+    pub fn from_number_with_overwrite<const N: usize>(
+        n: Number,
+        overwrite_digits: &[Digit; N],
+    ) -> Self {
+        let mut digits = [(0 as Digit); NUM_DIGITS];
+        let overwrite_start = digits.len() - overwrite_digits.len();
+        digits[overwrite_start..].copy_from_slice(overwrite_digits);
+        let index = int_to_digits(
+            n / (10 as Number).pow(N as u32),
+            &mut digits[..overwrite_start],
+        );
+
+        let first_non_zero_index = if index == digits[..overwrite_start].len() {
+            overwrite_start
+                + digits[overwrite_start..]
+                    .iter()
+                    .position(|&d| d != 0)
+                    .unwrap_or(digits[overwrite_start..].len())
+        } else {
+            overwrite_start + index
+        };
+
+        Self {
+            digits,
+            first_non_zero_index,
+        }
+    }
+
     pub fn to_number(&self) -> Number {
         digits_to_num(&self.digits)
     }
 
-    fn overwrite_digits(&mut self, digits: &[Digit]) {
+    fn overwrite_digits<const N: usize>(&mut self, digits: &[Digit; N]) {
         let start = self.digits.len() - digits.len();
         self.digits[start..].copy_from_slice(digits);
         if start < self.first_non_zero_index {
@@ -56,8 +82,8 @@ impl<const NUM_DIGITS: usize> Digits<NUM_DIGITS> {
         }
     }
 
-    pub fn with_overwritten(mut self, digits: &[Digit]) -> Self {
-        self.overwrite_digits(digits);
+    pub fn with_overwritten<const N: usize>(mut self, digits: &[Digit; N]) -> Self {
+        self.overwrite_digits::<N>(digits);
         self
     }
 

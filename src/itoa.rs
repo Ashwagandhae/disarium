@@ -11,7 +11,7 @@ const DEC_DIGITS_LUT: [u8; 200] = {
     lut
 };
 
-pub fn int_to_digits_old<const N: usize>(mut n: Number, buf: &mut [u8; N]) -> usize {
+pub fn int_to_digits_old(mut n: Number, buf: &mut [u8]) -> usize {
     const DIGIT_PAIRS: [[u8; 2]; 100] = {
         let mut pairs = [[0; 2]; 100];
         let mut i = 0;
@@ -23,7 +23,7 @@ pub fn int_to_digits_old<const N: usize>(mut n: Number, buf: &mut [u8; N]) -> us
         pairs
     };
 
-    let mut i = N;
+    let mut i = buf.len();
 
     while n >= 100 && i >= 2 {
         let pair = (n % 100) as usize;
@@ -45,7 +45,7 @@ pub fn int_to_digits_old<const N: usize>(mut n: Number, buf: &mut [u8; N]) -> us
 }
 
 #[inline]
-pub fn int_to_digits<const N: usize>(mut n: Number, buf: &mut [u8; N]) -> usize {
+pub fn int_to_digits(mut n: Number, buf: &mut [u8]) -> usize {
     let lut = &DEC_DIGITS_LUT;
 
     let mut curr = buf.len();
@@ -125,7 +125,7 @@ mod tests {
 
         for &n in &[0, 1, 5, 9, 10, 42, 99] {
             buf.fill(0);
-            int_to_digits::<N>(n, &mut buf);
+            int_to_digits(n, &mut buf);
             let digits = extract_digits(&buf);
             assert_eq!(digits, reference_digits(n), "failed for n = {}", n);
         }
@@ -138,7 +138,7 @@ mod tests {
 
         for &n in &[123, 4567, 89012, 99999, 100000, 654321] {
             buf.fill(0);
-            int_to_digits::<N>(n, &mut buf);
+            int_to_digits(n, &mut buf);
             let digits = extract_digits(&buf);
             assert_eq!(digits, reference_digits(n), "failed for n = {}", n);
         }
@@ -151,7 +151,7 @@ mod tests {
 
         for &n in &[1_000_000_000, 4_294_967_295, 9_223_372_036_854_775_807] {
             buf.fill(0);
-            int_to_digits::<N>(n, &mut buf);
+            int_to_digits(n, &mut buf);
             let digits = extract_digits(&buf);
             assert_eq!(digits, reference_digits(n), "failed for n = {}", n);
         }

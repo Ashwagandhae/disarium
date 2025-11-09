@@ -1,5 +1,5 @@
 use crate::{Digit, Number, itoa::int_to_digits};
-const MAX_DIGITS: usize = 20;
+const MAX_DIGITS: usize = 30;
 
 #[derive(Debug, Clone)]
 pub struct Digits<const NUM_DIGITS: usize> {

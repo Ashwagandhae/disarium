@@ -60,7 +60,7 @@ The above output came from checking all `u64`s. However, theoretically, there co
 2427
 2646798
 12157692622039623539
-found numbers in 683032245750 ns, or 683032 ms, or 683 secs
+found numbers in 377064379625 ns, or 377064 ms, or 377 secs
 ```
 
 Thus, we successfully confirm that there are only 20 disarium numbers.

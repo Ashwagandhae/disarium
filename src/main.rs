@@ -2,8 +2,8 @@ use std::time::Instant;
 
 use disarium::find_disarium;
 
-const BOUND: u64 = u64::MAX;
-// const BOUND: u128 = 10u128.pow(22);
+// const BOUND: u64 = u64::MAX;
+const BOUND: u128 = 10u128.pow(22) - 1;
 
 fn main() {
     let start = Instant::now();

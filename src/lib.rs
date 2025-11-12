@@ -6,7 +6,7 @@ pub mod digits;
 pub mod itoa;
 
 pub type Digit = u8;
-pub type Number = u64;
+pub type Number = u128;
 
 fn num_digits(mut n: Number) -> u32 {
     if n == 0 {
